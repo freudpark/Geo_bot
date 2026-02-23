@@ -35,7 +35,7 @@ def generate_ai_summary(schedule_data):
 1. 최상단에 "정보자원사업단 AI 알림이" 문구를 넣으세요.
 2. 그 바로 아래에 "제목 : [요약된 제목]" 형식을 넣으세요.
 3. 중간에는 핵심 내용만 3~5줄 내외로 간결하게 요약하세요.
-4. 마지막 줄에 "pyhgoshift info [사업완수 {d_day_str}]" 문구를 넣으며 마무리하세요.
+4. 마지막 줄에 "[사업완료일까지 {d_day_str}]" 문구를 넣으며 마무리하세요.
 """
 
     try:
@@ -78,7 +78,7 @@ def generate_ai_summary(schedule_data):
         print(f"[AI Error] {provider} failure: {str(e)}")
 
     # 최종 폴백: 에러 코드 대신 사용자 친화적인 안내 문구 반환
-    footer = f"\n\npyhgoshift info [사업완수 {d_day_str}]"
+    footer = f"\n\n[사업완료일까지 {d_day_str}]"
     return schedule_data + "\n\n💡 (안내: AI 요약 중 서버 혼잡으로 기본 정보를 전송합니다.)" + footer
 
 if __name__ == "__main__":
