@@ -37,10 +37,21 @@ def generate_ai_summary(schedule_data):
         if provider == "gemini":
             from google import genai
             client = genai.Client(api_key=api_key)
-            model_target = model_name or "gemini-2.0-flash"
-            print(f"Using Gemini Provider: {model_target}")
-            response = client.models.generate_content(model=model_target, contents=prompt)
-            return response.text
+            
+            # 시도할 Gemini 모델 목록
+            gemini_models = [model_name] if model_name else ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+            
+            last_gemini_error = ""
+            for m in gemini_models:
+                try:
+                    print(f"Using Gemini Provider: {m}")
+                    response = client.models.generate_content(model=m, contents=prompt)
+                    return response.text
+                except Exception as ex:
+                    last_gemini_error = str(ex)
+                    print(f"Gemini model {m} failed: {last_gemini_error}")
+                    continue
+            raise Exception(f"All Gemini models exhausted. Last error: {last_gemini_error}")
 
         # 2. OpenAI 호환 프로바이더 (openai SDK 사용: DeepSeek, Kimi, Qwen 등)
         else:
