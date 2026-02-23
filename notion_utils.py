@@ -30,9 +30,9 @@ def get_recipients():
     url = f"https://api.notion.com/v1/databases/{database_id}/query"
     payload = {
         "filter": {
-            "property": "Status",
-            "select": {
-                "equals": "Active"
+            "property": "상태",
+            "status": {
+                "equals": "완료"
             }
         }
     }
