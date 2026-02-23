@@ -25,7 +25,8 @@ class handler(BaseHTTPRequestHandler):
             from notion_utils import add_recipient
             
             # 1. 카카오 토큰 발급
-            tokens = get_access_token(code, client_id)
+            redirect_uri = params.get("redirect_uri", "https://localhost")
+            tokens = get_access_token(code, client_id, redirect_uri)
             if "access_token" not in tokens:
                 self.send_response(400)
                 self.end_headers()
@@ -186,8 +187,8 @@ class handler(BaseHTTPRequestHandler):
         function startKakaoAuth() {{
             const clientId = document.getElementById('regClientId').value;
             if(!clientId) {{ alert('REST API 키를 입력해 주세요.'); return; }}
-            const redirectUri = window.location.origin; // Vercel 주소 활용
-            const url = `https://kauth.kakao.com/oauth/authorize?client_id=${{clientId}}&redirect_uri=https://localhost&response_type=code`;
+            const redirectUri = window.location.origin; 
+            const url = `https://kauth.kakao.com/oauth/authorize?client_id=${{clientId}}&redirect_uri=${{redirectUri}}&response_type=code`;
             window.open(url, '_blank');
         }}
 
@@ -208,7 +209,7 @@ class handler(BaseHTTPRequestHandler):
                 const res = await fetch('/', {{
                     method: 'POST',
                     headers: {{ 'Content-Type': 'application/json' }},
-                    body: JSON.stringify({{ action: 'register', name, code, client_id: clientId }})
+                    body: JSON.stringify({{ action: 'register', name, code, client_id: clientId, redirect_uri: window.location.origin }})
                 }});
                 const data = await res.json();
                 if(res.ok) {{

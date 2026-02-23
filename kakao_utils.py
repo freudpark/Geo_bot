@@ -3,12 +3,12 @@ import requests
 import json
 import os
 
-def get_access_token(auth_code, client_id):
+def get_access_token(auth_code, client_id, redirect_uri="https://localhost"):
     url = "https://kauth.kakao.com/oauth/token"
     data = {
         "grant_type": "authorization_code",
         "client_id": client_id,
-        "redirect_uri": "https://localhost",
+        "redirect_uri": redirect_uri,
         "code": auth_code
     }
     response = requests.post(url, data=data)
