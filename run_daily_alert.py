@@ -29,7 +29,8 @@ def run():
     final_summary = generate_ai_summary(raw_summary)
 
     # 4. 카카오톡 전송
-    result = send_message_to_me(final_summary)
+    from kakao_utils import send_to_all_recipients
+    result = send_to_all_recipients(final_summary)
     
     # 서버리스 환경에서는 일반 파일 쓰기가 제한될 수 있으므로 분기 처리
     if not is_vercel:

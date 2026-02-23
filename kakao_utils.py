@@ -38,11 +38,10 @@ def load_tokens():
     with open(token_path, "r") as fp:
         return json.load(fp)
 
-def send_message_to_me(text):
-    tokens = load_tokens()
+def send_message(access_token, text):
     url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
     headers = {
-        "Authorization": "Bearer " + tokens["access_token"]
+        "Authorization": "Bearer " + access_token
     }
     template = {
         "object_type": "text",
@@ -58,6 +57,32 @@ def send_message_to_me(text):
     }
     response = requests.post(url, headers=headers, data=data)
     return response.json()
+
+def send_to_all_recipients(text):
+    from notion_utils import get_recipients
+    recipients = get_recipients()
+    
+    # 노션 등록자가 없으면 기본 환경변수 토큰으로 본인에게 전송 시도
+    if not recipients:
+        print("[Kakao] No Notion recipients. Falling back to single token.")
+        try:
+            tokens = load_tokens()
+            return [send_message(tokens["access_token"], text)]
+        except:
+            return [{"error": "No recipients found"}]
+
+    results = []
+    for r in recipients:
+        print(f"[Kakao] Sending to {r['name']}...")
+        res = send_message(r['access_token'], text)
+        results.append({"name": r['name'], "result": res})
+        
+    return results
+
+def send_message_to_me(text):
+    """기존 코드 호환성을 위해 유지: 첫 번째 등록자 혹은 기본 토큰으로 전송"""
+    results = send_to_all_recipients(text)
+    return results[0] if results else {"error": "Failed"}
 
 if __name__ == "__main__":
     # 이 부분은 테스트용입니다.
