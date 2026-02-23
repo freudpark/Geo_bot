@@ -1,12 +1,19 @@
 import requests
+import os
 from kakao_utils import send_message_to_me
 from daily_schedule_summary import get_daily_schedule
 
 def run():
     # 1. 최신 구글 시트 다운로드
     csv_url = 'https://docs.google.com/spreadsheets/d/1hS38RfKBaq13MOWutb4CteswgIIc5Weos0Np-4faRGk/export?format=csv&gid=0'
-    base_path = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(base_path, 'GEO_JobList.csv')
+    
+    # Vercel과 같은 서버리스 환경에서는 /tmp 폴더를 사용해야 합니다.
+    is_vercel = os.getenv('VERCEL') == '1'
+    if is_vercel:
+        csv_path = '/tmp/GEO_JobList.csv'
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        csv_path = os.path.join(base_path, 'GEO_JobList.csv')
     
     print(f"Downloading CSV to {csv_path}...")
     response = requests.get(csv_url)
@@ -24,10 +31,17 @@ def run():
     # 4. 카카오톡 전송
     result = send_message_to_me(final_summary)
     
-    log_path = os.path.join(base_path, 'execution_log.txt')
-    with open(log_path, 'a', encoding='utf-8') as f:
-        from datetime import datetime
-        f.write(f"{datetime.now()}: Execution result - {result}\n")
+    # 서버리스 환경에서는 일반 파일 쓰기가 제한될 수 있으므로 분기 처리
+    if not is_vercel:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        log_path = os.path.join(base_path, 'execution_log.txt')
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                from datetime import datetime
+                f.write(f"{datetime.now()}: Execution result - {result}\n")
+        except:
+            pass
+    
     print(f"Finished. Result: {result}")
 
 if __name__ == "__main__":
