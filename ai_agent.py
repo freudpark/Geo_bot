@@ -10,9 +10,13 @@ def generate_ai_summary(schedule_data):
     provider = os.getenv("AI_PROVIDER", "gemini").lower()
     api_key = os.getenv("AI_API_KEY") or os.getenv("GEMINI_API_KEY")
     
+    # 디버깅용 로그 (Vercel 로그에서 확인 가능)
+    print(f"[Debug] Provider detected: {provider}")
+    print(f"[Debug] API Key set: {'Yes' if api_key else 'No'}")
+
     # AI 설정이 없으면 즉시 요약 없이 원본 반환
     if not api_key:
-        return schedule_data + "\n\n(안내: AI 키가 설정되지 않아 기본 일정만 전항합니다.)"
+        return schedule_data + "\n\n(안내: AI 키가 설정되지 않아 기본 일정만 전송합니다.)"
 
     common_prompt = f"""
 다음 일정을 친절한 뉴스 리포트 스타일로 요약해 주세요.
