@@ -187,8 +187,9 @@ class handler(BaseHTTPRequestHandler):
         function startKakaoAuth() {{
             const clientId = document.getElementById('regClientId').value;
             if(!clientId) {{ alert('REST API 키를 입력해 주세요.'); return; }}
-            const redirectUri = window.location.origin; 
-            const url = `https://kauth.kakao.com/oauth/authorize?client_id=${{clientId}}&redirect_uri=${{redirectUri}}&response_type=code`;
+            const redirectUri = window.location.origin + '/'; // 끝에 /를 붙여서 표준화
+            console.log('Redirect URI:', redirectUri);
+            const url = `https://kauth.kakao.com/oauth/authorize?client_id=${{clientId}}&redirect_uri=${{encodeURIComponent(redirectUri)}}&response_type=code`;
             window.open(url, '_blank');
         }}
 
@@ -205,11 +206,12 @@ class handler(BaseHTTPRequestHandler):
             btn.innerText = '등록 중...';
             resDiv.classList.add('hidden');
 
+            const redirectUri = window.location.origin + '/';
             try {{
                 const res = await fetch('/', {{
                     method: 'POST',
                     headers: {{ 'Content-Type': 'application/json' }},
-                    body: JSON.stringify({{ action: 'register', name, code, client_id: clientId, redirect_uri: window.location.origin }})
+                    body: JSON.stringify({{ action: 'register', name, code, client_id: clientId, redirect_uri: redirectUri }})
                 }});
                 const data = await res.json();
                 if(res.ok) {{
