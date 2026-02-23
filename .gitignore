@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+.env
+
+# Data and Logs
+kakao_token.json
+GEO_JobList.csv
+test_sheet.csv
+execution_log.txt
+
+# IDE
+.vscode/
+.idea/
+.gemini/
