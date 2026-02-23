@@ -33,7 +33,7 @@ class handler(BaseHTTPRequestHandler):
                 return
             
             # 2. 노션에 저장
-            success = add_recipient(name, tokens)
+            success, error_msg = add_recipient(name, tokens)
             
             if success:
                 self.send_response(200)
@@ -42,8 +42,9 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"message": "Registration successful"}).encode())
             else:
                 self.send_response(500)
+                self.send_header('Content-type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps({"error": "Failed to save to Notion"}).encode())
+                self.wfile.write(json.dumps({"error": error_msg}).encode())
 
     def do_GET(self):
         self.send_response(200)

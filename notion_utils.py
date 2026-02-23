@@ -69,8 +69,10 @@ def add_recipient(name, tokens):
     database_id = os.getenv("NOTION_DATABASE_ID")
     headers = get_notion_headers()
     
-    if not database_id or not headers:
-        return False
+    if not database_id:
+        return False, "NOTION_DATABASE_ID is not set in environment variables."
+    if not headers:
+        return False, "Notion API Key is missing or invalid."
 
     url = "https://api.notion.com/v1/pages"
     payload = {
@@ -87,12 +89,16 @@ def add_recipient(name, tokens):
     try:
         response = requests.post(url, headers=headers, json=payload)
         if response.status_code != 200:
-            print(f"[Notion] Error Response: {response.text}")
+            error_data = response.json()
+            error_msg = error_data.get("message", response.text)
+            print(f"[Notion] Error Response: {error_msg}")
+            return False, f"Notion API Error: {error_msg}"
+        
         response.raise_for_status()
-        return True
+        return True, "Success"
     except Exception as e:
         print(f"[Notion] Add recipient failed: {e}")
-        return False
+        return False, str(e)
 
 def update_recipient_tokens(page_id, tokens):
     headers = get_notion_headers()
