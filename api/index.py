@@ -116,16 +116,17 @@ class handler(BaseHTTPRequestHandler):
                         <input type="password" id="regClientId" value="{client_id_placeholder}" placeholder="REST API 키" class="bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                     </div>
                     <div class="flex gap-3">
-                        <button onclick="startKakaoAuth()" class="flex-1 bg-amber-400 hover:bg-amber-300 text-amber-900 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                        <button type="button" onclick="startKakaoAuth()" class="flex-1 bg-amber-400 hover:bg-amber-300 text-amber-900 py-3 rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2">
                             1. 카카오 인증 창 열기
                         </button>
                     </div>
                     <p class="text-[10px] text-amber-500/80 text-center font-mono break-all" id="redirectHint">
-                        카카오 설정용: <script>document.write(window.location.origin)</script>
+                        카카오 설정용: <span id="hintUrl"></span>
+                        <script>document.getElementById('hintUrl').innerText = window.location.origin;</script>
                     </p>
                     <div class="space-y-2">
                         <input type="text" id="regCode" placeholder="인증 완료 후 나타나는 code 입력" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <button id="regBtn" onclick="registerRecipient()" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-xl font-bold text-sm transition-all border border-slate-600">
+                        <button type="button" id="regBtn" onclick="registerRecipient()" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-xl font-bold text-sm transition-all border border-slate-600">
                             2. 수신자 등록 완료
                         </button>
                     </div>
@@ -221,6 +222,9 @@ class handler(BaseHTTPRequestHandler):
                 if(res.ok) {{
                     resDiv.innerHTML = '✅ 등록 성공! 정해진 시간에 알림이 발송됩니다.';
                     resDiv.className = 'p-3 rounded-lg text-xs border text-center bg-emerald-500/10 border-emerald-500/30 text-emerald-200';
+                    // 등록 성공 시 입력 필드 초기화
+                    document.getElementById('regName').value = '';
+                    document.getElementById('regCode').value = '';
                 }} else {{
                     throw new Error(data.error);
                 }}
