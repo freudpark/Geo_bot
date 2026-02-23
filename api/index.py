@@ -120,6 +120,9 @@ class handler(BaseHTTPRequestHandler):
                             1. 카카오 인증 창 열기
                         </button>
                     </div>
+                    <p class="text-[10px] text-amber-500/80 text-center font-mono break-all" id="redirectHint">
+                        카카오 설정용: <script>document.write(window.location.origin)</script>
+                    </p>
                     <div class="space-y-2">
                         <input type="text" id="regCode" placeholder="인증 완료 후 나타나는 code 입력" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                         <button id="regBtn" onclick="registerRecipient()" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-xl font-bold text-sm transition-all border border-slate-600">
@@ -187,8 +190,9 @@ class handler(BaseHTTPRequestHandler):
         function startKakaoAuth() {{
             const clientId = document.getElementById('regClientId').value;
             if(!clientId) {{ alert('REST API 키를 입력해 주세요.'); return; }}
-            const redirectUri = window.location.origin + '/'; // 끝에 /를 붙여서 표준화
-            console.log('Redirect URI:', redirectUri);
+            const redirectUri = window.location.origin; 
+            // 함장님께 정확한 주소를 한번 더 알림으로 보여드립니다.
+            console.log('Using Redirect URI:', redirectUri);
             const url = `https://kauth.kakao.com/oauth/authorize?client_id=${{clientId}}&redirect_uri=${{encodeURIComponent(redirectUri)}}&response_type=code`;
             window.open(url, '_blank');
         }}
@@ -206,7 +210,7 @@ class handler(BaseHTTPRequestHandler):
             btn.innerText = '등록 중...';
             resDiv.classList.add('hidden');
 
-            const redirectUri = window.location.origin + '/';
+            const redirectUri = window.location.origin;
             try {{
                 const res = await fetch('/', {{
                     method: 'POST',
