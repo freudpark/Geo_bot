@@ -5,6 +5,12 @@ from datetime import datetime
 
 def get_notion_headers():
     token = os.getenv("NOTION_API_KEY")
+    db_id = os.getenv("NOTION_DATABASE_ID")
+    
+    print(f"[Notion] Auth Check - API_KEY: {'Set' if token else 'NOT SET'}, DB_ID: {'Set' if db_id else 'NOT SET'}")
+    if token:
+        print(f"[Notion] Token Preview: {token[:7]}...{token[-4:] if len(token) > 10 else ''}")
+
     if not token:
         return None
     return {
@@ -80,6 +86,8 @@ def add_recipient(name, tokens):
     
     try:
         response = requests.post(url, headers=headers, json=payload)
+        if response.status_code != 200:
+            print(f"[Notion] Error Response: {response.text}")
         response.raise_for_status()
         return True
     except Exception as e:
