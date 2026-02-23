@@ -37,8 +37,12 @@
 
 | 변수명 | 설명 | 비고 |
 | :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Google AI Studio에서 발급받은 API 키 | [발급받기](https://aistudio.google.com/) |
-| `KAKAO_TOKEN_JSON` | `kakao_token.json` 파일의 JSON 내용 전체 | 텍스트 형태로 복사 |
+| `GEMINI_API_KEY` | Google AI Studio에서 발급받은 API 키 | (기존 방식 유지용) |
+| `KAKAO_TOKEN_JSON` | `kakao_token.json` 파일 내용 전체 | 필수 |
+| `AI_PROVIDER` | 사용할 AI 업체 (`gemini`, `deepseek`, `kimi`, `qwen`) | 선택 (기본: gemini) |
+| `AI_API_KEY` | 선택한 AI 업체의 API 키 | 필수 (Gemini 제외 시) |
+| `AI_BASE_URL` | AI 업체의 API 엔드포인트 주소 | 선택 (기본값 내장) |
+| `AI_MODEL` | 사용할 특정 모델 명칭 | 선택 (기본값 내장) |
 
 ### 2. 로컬 실행
 ```bash
