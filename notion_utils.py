@@ -46,16 +46,27 @@ def get_recipients():
         for page in results:
             props = page.get("properties", {})
             try:
-                name = props.get("Name", {}).get("title", [{}])[0].get("plain_text", "Unknown")
-                access_token = props.get("Access Token", {}).get("rich_text", [{}])[0].get("plain_text", "")
-                refresh_token = props.get("Refresh Token", {}).get("rich_text", [{}])[0].get("plain_text", "")
+                # 한국어 컬럼명 매핑: 이름, 텍스트(Access), 텍스트 1(Refresh), 상태, 날짜
+                name = props.get("이름", {}).get("title", [{}])[0].get("plain_text", "Unknown")
+                access_token = props.get("텍스트", {}).get("rich_text", [{}])[0].get("plain_text", "")
+                refresh_token = props.get("텍스트 1", {}).get("rich_text", [{}])[0].get("plain_text", "")
                 
+                # 상태는 '상태' 또는 'Status' 확인 (기본적으로 '상태' 사용)
+                status_prop = props.get("상태", {})
+                status_type = status_prop.get("type")
+                status_value = ""
+                if status_type == "status":
+                    status_value = status_prop.get("status", {}).get("name", "")
+                elif status_type == "select":
+                    status_value = status_prop.get("select", {}).get("name", "")
+
                 if access_token:
                     recipients.append({
                         "name": name,
                         "access_token": access_token,
                         "refresh_token": refresh_token,
-                        "page_id": page.get("id")
+                        "page_id": page.get("id"),
+                        "status": status_value
                     })
             except Exception as e:
                 print(f"[Notion] Error parsing page {page.get('id')}: {e}")
@@ -78,11 +89,11 @@ def add_recipient(name, tokens):
     payload = {
         "parent": {"database_id": database_id},
         "properties": {
-            "Name": {"title": [{"text": {"content": name}}]},
-            "Access Token": {"rich_text": [{"text": {"content": tokens.get("access_token", "")}}]},
-            "Refresh Token": {"rich_text": [{"text": {"content": tokens.get("refresh_token", "")}}]},
-            "Status": {"select": {"name": "Active"}},
-            "Updated At": {"date": {"start": datetime.now().isoformat()}}
+            "이름": {"title": [{"text": {"content": name}}]},
+            "텍스트": {"rich_text": [{"text": {"content": tokens.get("access_token", "")}}]},
+            "텍스트 1": {"rich_text": [{"text": {"content": tokens.get("refresh_token", "")}}]},
+            "상태": {"status": {"name": "완료"}}, # 사용자 DB의 '완료' 옵션 사용
+            "날짜": {"date": {"start": datetime.now().isoformat()}}
         }
     }
     
@@ -108,9 +119,9 @@ def update_recipient_tokens(page_id, tokens):
     url = f"https://api.notion.com/v1/pages/{page_id}"
     payload = {
         "properties": {
-            "Access Token": {"rich_text": [{"text": {"content": tokens.get("access_token", "")}}]},
-            "Refresh Token": {"rich_text": [{"text": {"content": tokens.get("refresh_token", "")}}]},
-            "Updated At": {"date": {"start": datetime.now().isoformat()}}
+            "텍스트": {"rich_text": [{"text": {"content": tokens.get("access_token", "")}}]},
+            "텍스트 1": {"rich_text": [{"text": {"content": tokens.get("refresh_token", "")}}]},
+            "날짜": {"date": {"start": datetime.now().isoformat()}}
         }
     }
     
