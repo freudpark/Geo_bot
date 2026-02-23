@@ -12,7 +12,8 @@ def generate_ai_summary(schedule_data):
         return schedule_data + "\n\n(참고: GEMINI_API_KEY가 설정되지 않아 기본 요약을 전송합니다.)"
 
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # 모델명을 더 구체적으로 지정하여 404 오류 방지
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
     prompt = f"""
 다음은 오늘 예정된 구글 시트 일정 데이터입니다.
@@ -33,7 +34,10 @@ def generate_ai_summary(schedule_data):
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
-        return schedule_data + f"\n\n(AI 요약 생성 중 오류 발생: {str(e)})"
+        # 에러 메시지를 더 상세히 출력하여 디버깅 지원
+        error_msg = f"\n\n(AI 요약 생성 중 오류 발생: {type(e).__name__} - {str(e)})"
+        print(f"Gemini API Error: {error_msg}")
+        return schedule_data + error_msg
 
 if __name__ == "__main__":
     test_data = "## 정보자원 AI 알림이 - 2026년 02월 23일\n- [작업] 서버 점검 (상태: 진행중, 팀: 인프라팀)\n- [일정] 주간 회의 (상태: 예정, 팀: 기획팀)"
