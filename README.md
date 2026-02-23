@@ -1,4 +1,4 @@
-# 🤖 Geo_bot: 정보자원 AI 일시 알림이
+# 🤖 PyhgoShift: Geo_bot (정보자원 AI 일시 알림이)
 
 구글 시트의 복잡한 일정을 분석하여, 매일 아침 카카오톡으로 스마트한 AI 요약 리포트를 배달해주는 지능형 헬퍼 시스템입니다.
 
@@ -11,68 +11,64 @@
 *   병합 셀이나 비정형 데이터 구조를 견고하게 분석하는 지능형 파싱 엔진을 탑재했습니다.
 
 ### 2. Gemini AI 기반 스마트 요약
-*   단순한 일정 나열이 아닌, **Google Gemini 1.5 Flash**를 사용하여 읽기 좋은 뉴스 리포트 스타일로 요약을 생성합니다.
+*   **Google Gemini 1.5 Flash**를 사용하여 읽기 좋은 뉴스 리포트 스타일로 요약을 생성합니다.
 *   일정의 중요도와 맥락을 파악하여 사용자에게 필요한 통찰을 제공합니다.
 
-### 3. 카카오톡 연동 자동 알림
-*   요약된 내용을 카카오톡 '나에게 보내기'를 통해 즉시 전송합니다.
-*   Vercel Cron Jobs를 활용하여 서버 없이 24시간 자동화 운영이 가능합니다.
+### 3. 멀티 수신자 카카오톡 연동
+*   **Notion Database**와 연동되어 등록된 모든 수신자에게 개별 알림을 발송합니다.
+*   Vercel Dashboard를 통해 누구나 쉽게 자신의 카카오톡을 연동할 수 있습니다.
 
 ---
 
-## 🛠 기술 스택
+## 🛠 필수 설정 가이드 (재발 방지 필독)
 
-*   **Language**: Python 3.x
-*   **Data Processing**: Pandas
-*   **AI Engine**: Google GenAI (Gemini)
-*   **Infrastructure**: Vercel (Serverless Functions, Cron Jobs)
-*   **Integration**: KakaoTalk Message API, Google Sheets CSV
+> [!IMPORTANT]
+> 프로젝트 설정 시 가장 많이 실수하는 부분들을 정리했습니다. 다음 내용을 반드시 준수해야 작동합니다.
+
+### 1. Notion 연동 설정
+*   **API 토큰**: 반드시 `ntn_`으로 시작하는 **Internal Integration Token**을 사용해야 합니다. (비밀번호 형식의 다른 키와 혼동 주의)
+*   **데이터베이스 연결**: Notion DB 페이지 오른쪽 상단 `...` -> `연결 추가` -> 만든 봇 이름을 반드시 선택해야 합니다.
+*   **컬럼명 매핑**: Notion DB의 컬럼명이 `이름`, `텍스트`(Access), `텍스트 1`(Refresh), `상태`, `날짜`와 정확히 일치해야 합니다.
+
+### 2. Kakao 개발자 콘솔 설정 (`KOE006` 해결)
+*   **Redirect URI 등록**: 
+    - 대시보드 하단 노란색 글씨로 표시되는 주소를 **한 토씨도 틀리지 않게** 등록하십시오.
+    - 예: `https://your-app.vercel.app` (끝에 `/`가 없는 형식을 권장하며, 코드와 콘솔 설정이 완벽히 일치해야 합니다.)
+*   **보안 설정**: 
+    - **[내 애플리케이션] > [제품 설정] > [카카오 로그인] > [보안]** 메뉴에서 **Client Secret** 활성화를 반드시 **`OFF`**로 설정하십시오. (`ON`일 경우 인증 실패)
+*   **로그인 활성화**: 카카오 로그인 상태가 **`ON`**인지 반드시 확인하십시오.
 
 ---
 
-## 📦 설치 및 설정
-
-### 1. 환경 변수 설정
-클라우드 배포(Vercel) 시 다음 환경 변수 설정이 필요합니다.
+## 📦 환경 변수 (Vercel)
 
 | 변수명 | 설명 | 비고 |
 | :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Google AI Studio에서 발급받은 API 키 | (기존 방식 유지용) |
-| `KAKAO_TOKEN_JSON` | `kakao_token.json` 파일 내용 전체 | 필수 |
-| `AI_PROVIDER` | 사용할 AI 업체 (`gemini`, `deepseek`, `kimi`, `qwen`) | 선택 (기본: gemini) |
-| `AI_API_KEY` | 선택한 AI 업체의 API 키 | 필수 (Gemini 제외 시) |
-| `AI_BASE_URL` | AI 업체의 API 엔드포인트 주소 | 선택 (기본값 내장) |
-| `AI_MODEL` | 사용할 특정 모델 명칭 | 선택 (기본값 내장) |
-
-### 2. 로컬 실행
-```bash
-# 의존성 설치
-pip install -r requirements.txt
-
-# .env 파일 생성 및 키 입력
-echo "GEMINI_API_KEY=your_key_here" > .env
-
-# 실행
-python run_daily_alert.py
-```
+| `NOTION_API_KEY` | `ntn_`으로 시작하는 노션 통합 토큰 | **필수** |
+| `NOTION_DATABASE_ID` | 연동할 노션 데이터베이스 ID | **필수** |
+| `GEMINI_API_KEY` | Google AI Studio에서 발급받은 API 키 | AI 요약용 |
+| `AI_PROVIDER` | 사용할 AI 업체 | 기본값: `gemini` |
+| `KAKAO_CLIENT_ID` | 카카오 REST API 키 | 대시보드 기본값 세팅용 |
 
 ---
 
-## 🌐 배포 가이드 (Vercel)
+## 🌐 사용 방법 (수신자 등록)
 
-1.  이 저장소를 자신의 GitHub로 Fork 또는 Push합니다.
-2.  Vercel에서 **New Project**를 생성하고 GitHub 저장소를 연결합니다.
-3.  **Environment Variables** 탭에서 위의 필수 변수들을 등록합니다.
-4.  배포 완료 후, 매일 한국 시간 오전 9시에 `/api/cron` 엔드포인트가 자동으로 호출되어 알림이 전송됩니다.
+1.  **대시보드 접속**: 배포된 Vercel URL로 접속합니다.
+2.  **이름 입력**: 수신 대상자의 이름을 입력합니다.
+3.  **카카오 인증**: `1. 카카오 인증 창 열기`를 눌러 로그인 후, 주소창에 뜨는 `code=...` 뒷부분을 복사합니다.
+4.  **등록 완료**: 복사한 코드를 대시보드에 붙여넣고 `2. 수신자 등록 완료`를 누릅니다.
+    *   인증 성공 시 이름과 코드 칸이 자동으로 초기화되며 Notion DB에 저장됩니다.
 
 ---
 
 ## 👨‍💻 프로젝트 관리 (The 7 Parks)
 
 이 프로젝트는 **파이고시프트(PyhgoShift)** 프로젝트의 일환으로 구축되었습니다.
-*   **Pilot Park**: 전체 설계 및 항로 설정
-*   **Innovator Park**: AI 로직 및 데이터 파싱 구현
-*   **Synapse Park**: 클라우드 인프라 및 API 연결
+*   **Pilot Park [CPO]**: 전체 설계 및 항로 설정
+*   **Innovator Park [CTO]**: AI 로직 및 UI/UX 구현
+*   **Gordon Park [CSO]**: 보안 검증 및 KOE006 대응 완료
+*   **Synapse Park [COO]**: API 연동 및 데이터 흐름 최적화
 
 ---
 
