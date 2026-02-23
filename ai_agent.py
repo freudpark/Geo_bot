@@ -20,15 +20,15 @@ def generate_ai_summary(schedule_data):
 
     common_prompt = f"""
 다음 일정을 핵심만 뽑아 아주 간결한 불렛포인트로 요약해 주세요. 
-불필요한 수식어는 빼고, 즉시 파악해야 할 행동 위주로 작성하세요.
 
 [데이터]
 {schedule_data}
 
-[요약 가이드]
-- 핵심 내용만 3~5줄 내외로 요약.
-- 마크다운 불렛 활용.
-- 끝에 아주 짧은 응원 한마디.
+[작성 규칙 - 반드시 지킬 것]
+1. 최상단에 "정보자원사업단 AI 알림이" 문구를 넣으세요.
+2. 그 바로 아래에 "- 제목 : [요약된 제목]" 형식을 넣으세요.
+3. 중간에는 핵심 내용만 3~5줄 내외로 간결하게 요약하세요.
+4. 마지막 줄에 "pyhgoshift info" 문구를 넣으며 마무리하세요.
 """
 
     try:
@@ -71,7 +71,8 @@ def generate_ai_summary(schedule_data):
         print(f"[AI Error] {provider} failure: {str(e)}")
 
     # 최종 폴백: 에러 코드 대신 사용자 친화적인 안내 문구 반환
-    return schedule_data + "\n\n💡 (안내: 현재 AI 서버가 매우 혼잡하여 기본 일정을 우선 전송합니다. 잠시 후 새로고침하시면 AI 요약이 활성화될 수 있습니다.)"
+    footer = "\n\npyhgoshift info"
+    return schedule_data + "\n\n💡 (안내: AI 요약 중 서버 혼잡으로 기본 정보를 전송합니다.)" + footer
 
 if __name__ == "__main__":
     test_data = "## 정보자원 AI 알림이 - 2026년 02월 23일\n- [작업] 서버 점검 (상태: 진행중, 팀: 인프라팀)\n- [일정] 주간 회의 (상태: 예정, 팀: 기획팀)"
