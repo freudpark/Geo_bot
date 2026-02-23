@@ -10,10 +10,10 @@ def run():
     # Vercel과 같은 서버리스 환경에서는 /tmp 폴더를 사용해야 합니다.
     is_vercel = os.getenv('VERCEL') == '1'
     if is_vercel:
-        csv_path = '/tmp/GEO_JobList.csv'
+        csv_path = '/tmp/pyhgoshift_info.csv'
     else:
         base_path = os.path.dirname(os.path.abspath(__file__))
-        csv_path = os.path.join(base_path, 'GEO_JobList.csv')
+        csv_path = os.path.join(base_path, 'pyhgoshift_info.csv')
     
     print(f"Downloading CSV to {csv_path}...")
     response = requests.get(csv_url)

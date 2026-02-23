@@ -13,6 +13,15 @@ def get_access_token(auth_code, client_id):
     }
     response = requests.post(url, data=data)
     tokens = response.json()
+    if "access_token" in tokens:
+        # 실행 파일 기준 상대 경로 사용
+        token_path = os.path.join(os.path.dirname(__file__), "kakao_token.json")
+        with open(token_path, "w") as fp:
+            json.dump(tokens, fp)
+        return tokens
+    else:
+        return tokens
+
 def load_tokens():
     # 1. 환경 변수에서 토큰 정보를 먼저 시도 (Vercel 등 클라우드 환경용)
     env_token = os.getenv("KAKAO_TOKEN_JSON")

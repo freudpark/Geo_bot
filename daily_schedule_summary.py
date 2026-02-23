@@ -61,7 +61,7 @@ def get_daily_schedule(file_path):
     # 시작일 <= 오늘 <= 종료일 인 경우를 찾습니다.
     today_schedule = df[(df['일자 (시작)'].dt.date <= today) & (df['일자 (종료)'].dt.date >= today)]
 
-    summary = f"## 정보자원 AI 알림이 - {today.strftime('%Y년 %m월 %d일')}\n\n"
+    summary = f"## 🚀 PyhgoShift Info - {today.strftime('%Y년 %m월 %d일')}\n\n"
 
     if not today_schedule.empty:
         summary += "### 오늘의 주요 일정 및 작업 계획\n\n"
