@@ -13,11 +13,16 @@ def get_access_token(auth_code, client_id):
     }
     response = requests.post(url, data=data)
     tokens = response.json()
+    
     if "access_token" in tokens:
-        # 실행 파일 기준 상대 경로 사용
-        token_path = os.path.join(os.path.dirname(__file__), "kakao_token.json")
-        with open(token_path, "w") as fp:
-            json.dump(tokens, fp)
+        # Vercel 환경이 아닐 때만 파일로 저장 (로컬 테스트용)
+        if not os.getenv("VERCEL"):
+            try:
+                token_path = os.path.join(os.path.dirname(__file__), "kakao_token.json")
+                with open(token_path, "w") as fp:
+                    json.dump(tokens, fp)
+            except Exception as e:
+                print(f"[Kakao] Token save failed (expected on Vercel): {e}")
         return tokens
     else:
         return tokens
