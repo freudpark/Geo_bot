@@ -5,10 +5,14 @@
             "schedule": "0 0 * * *"
         }
     ],
-    "routes": [
+    "rewrites": [
         {
-            "src": "/api/cron",
-            "dest": "/api/cron.py"
+            "source": "/",
+            "destination": "/api/index"
+        },
+        {
+            "source": "/api/cron",
+            "destination": "/api/cron.py"
         }
     ]
 }
