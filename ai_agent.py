@@ -12,10 +12,22 @@ def generate_ai_summary(schedule_data):
         return schedule_data + "\n\n(참고: GEMINI_API_KEY가 설정되지 않아 기본 요약을 전송합니다.)"
 
     genai.configure(api_key=api_key)
-    # 모델명을 더 구체적으로 지정하여 404 오류 방지
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    
+    # 시도할 모델 목록 (환경에 따라 작동하는 모델이 다를 수 있음)
+    model_names = [
+        'gemini-1.5-flash',
+        'gemini-pro',
+        'gemini-1.5-flash-001',
+        'gemini-1.5-pro'
+    ]
 
-    prompt = f"""
+    last_error = ""
+    for model_name in model_names:
+        try:
+            print(f"Trying Gemini model: {model_name}...")
+            model = genai.GenerativeModel(model_name)
+            
+            prompt = f"""
 다음은 오늘 예정된 구글 시트 일정 데이터입니다.
 이 내용을 바탕으로 사용자가 읽기 쉽고 친절한 '오늘의 미션' 또는 '뉴스 리포트' 스타일로 요약해 주세요.
 
@@ -29,15 +41,16 @@ def generate_ai_summary(schedule_data):
 4. 마지막에는 힘찬 응원의 메시지를 한 줄 추가해 주세요.
 5. 마크다운 형식을 적절히 사용하여 가독성을 높여주세요.
 """
+            response = model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            last_error = f"{type(e).__name__}: {str(e)}"
+            print(f"Model {model_name} failed: {last_error}")
+            continue
 
-    try:
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        # 에러 메시지를 더 상세히 출력하여 디버깅 지원
-        error_msg = f"\n\n(AI 요약 생성 중 오류 발생: {type(e).__name__} - {str(e)})"
-        print(f"Gemini API Error: {error_msg}")
-        return schedule_data + error_msg
+    # 모든 모델이 실패한 경우
+    error_msg = f"\n\n(AI 요약 생성 중 오류 발생: 모든 시도된 모델이 실패했습니다. 마지막 에러: {last_error})"
+    return schedule_data + error_msg
 
 if __name__ == "__main__":
     test_data = "## 정보자원 AI 알림이 - 2026년 02월 23일\n- [작업] 서버 점검 (상태: 진행중, 팀: 인프라팀)\n- [일정] 주간 회의 (상태: 예정, 팀: 기획팀)"
