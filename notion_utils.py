@@ -4,8 +4,8 @@ import json
 from datetime import datetime
 
 def get_notion_headers():
-    token = os.getenv("NOTION_API_KEY")
-    db_id = os.getenv("NOTION_DATABASE_ID")
+    token = os.getenv("NOTION_API_KEY", "").strip()
+    db_id = os.getenv("NOTION_DATABASE_ID", "").strip()
     
     print(f"[Notion] Auth Check - API_KEY: {'Set' if token else 'NOT SET'}, DB_ID: {'Set' if db_id else 'NOT SET'}")
     if token:
