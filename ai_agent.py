@@ -13,19 +13,24 @@ def generate_ai_summary(schedule_data):
 
     genai.configure(api_key=api_key)
     
-    # 시도할 모델 목록 (환경에 따라 작동하는 모델이 다를 수 있음)
+    # 시도할 모델 목록 (안정성이 높은 순서대로 시도)
     model_names = [
         'gemini-1.5-flash',
+        'gemini-1.5-flash-latest',
         'gemini-pro',
-        'gemini-1.5-flash-001',
-        'gemini-1.5-pro'
+        'gemini-2.0-flash-exp',
+        'gemini-1.5-flash-001'
     ]
 
     last_error = ""
+    # 빌드 버전 태그 (배포 확인용)
+    build_ver = "20260223-1300"
+    
     for model_name in model_names:
         try:
-            print(f"Trying Gemini model: {model_name}...")
+            print(f"[{build_ver}] Trying Gemini model: {model_name}...")
             model = genai.GenerativeModel(model_name)
+            # ... (생략된 프롬프트 로직은 동일하게 유지)
             
             prompt = f"""
 다음은 오늘 예정된 구글 시트 일정 데이터입니다.
@@ -49,7 +54,7 @@ def generate_ai_summary(schedule_data):
             continue
 
     # 모든 모델이 실패한 경우
-    error_msg = f"\n\n(AI 요약 생성 중 오류 발생: 모든 시도된 모델이 실패했습니다. 마지막 에러: {last_error})"
+    error_msg = f"\n\n(AI 요약 생성 중 오류 발생 [{build_ver}]: 모든 시도된 모델이 실패했습니다. 마지막 에러: {last_error})"
     return schedule_data + error_msg
 
 if __name__ == "__main__":
