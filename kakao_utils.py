@@ -27,6 +27,26 @@ def get_access_token(auth_code, client_id, redirect_uri="https://localhost"):
     else:
         return tokens
 
+def refresh_kakao_token(refresh_token, client_id):
+    url = "https://kauth.kakao.com/oauth/token"
+    data = {
+        "grant_type": "refresh_token",
+        "client_id": client_id,
+        "refresh_token": refresh_token
+    }
+    response = requests.post(url, data=data)
+    new_tokens = response.json()
+    
+    if "access_token" in new_tokens:
+        print("[Kakao] Token refreshed successfully.")
+        # 만약 결과에 refresh_token이 없으면 기존 것을 유지해야 함
+        if "refresh_token" not in new_tokens:
+            new_tokens["refresh_token"] = refresh_token
+        return new_tokens
+    else:
+        print(f"[Kakao] Token refresh failed: {new_tokens}")
+        return None
+
 def load_tokens():
     # 1. 환경 변수에서 토큰 정보를 먼저 시도 (Vercel 등 클라우드 환경용)
     env_token = os.getenv("KAKAO_TOKEN_JSON")
@@ -76,10 +96,26 @@ def send_to_all_recipients(text):
         except:
             return [{"error": "No recipients found"}]
 
+    client_id = os.getenv("KAKAO_CLIENT_ID")
     results = []
+    
     for r in recipients:
         print(f"[Kakao] Sending to {r['name']}...")
         res = send_message(r['access_token'], text)
+        
+        # 토큰 만료 에러 (-401) 발생 시 리프레시 시도
+        if isinstance(res, dict) and res.get("code") == -401 and r.get("refresh_token") and client_id:
+            print(f"[Kakao] Token expired for {r['name']}. Attempting refresh...")
+            new_tokens = refresh_kakao_token(r['refresh_token'], client_id)
+            if new_tokens:
+                # 노션의 토큰 업데이트
+                from notion_utils import update_recipient_tokens
+                update_recipient_tokens(r['page_id'], new_tokens)
+                
+                # 새 토큰으로 재전송
+                print(f"[Kakao] Retrying send for {r['name']} with new token.")
+                res = send_message(new_tokens["access_token"], text)
+        
         results.append({"name": r['name'], "result": res})
         
     return results

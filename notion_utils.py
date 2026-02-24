@@ -42,16 +42,18 @@ def get_recipients():
         response.raise_for_status()
         results = response.json().get("results", [])
         
+        # 만약 필터링된 결과가 없으면 전체 데이터를 가져와서 수동 필터링 시도 (Notion 필터 속성 불일치 대비)
+        if not results:
+            print("[Notion] No results with group filter. Trying secondary fetch without filter.")
+            res_all = requests.post(url, headers=headers, json={})
+            if res_all.status_code == 200:
+                results = res_all.json().get("results", [])
+
         recipients = []
         for page in results:
             props = page.get("properties", {})
             try:
-                # 한국어 컬럼명 매핑: 이름, 텍스트(Access), 텍스트 1(Refresh), 상태, 날짜
-                name = props.get("이름", {}).get("title", [{}])[0].get("plain_text", "Unknown")
-                access_token = props.get("텍스트", {}).get("rich_text", [{}])[0].get("plain_text", "")
-                refresh_token = props.get("텍스트 1", {}).get("rich_text", [{}])[0].get("plain_text", "")
-                
-                # 상태는 '상태' 또는 'Status' 확인 (기본적으로 '상태' 사용)
+                # 상태 확인 (status 또는 select)
                 status_prop = props.get("상태", {})
                 status_type = status_prop.get("type")
                 status_value = ""
@@ -59,7 +61,15 @@ def get_recipients():
                     status_value = status_prop.get("status", {}).get("name", "")
                 elif status_type == "select":
                     status_value = status_prop.get("select", {}).get("name", "")
+                
+                # '완료' 상태가 아니면 건너뜀 (수동 필터링 시)
+                if status_value != "완료":
+                    continue
 
+                name = props.get("이름", {}).get("title", [{}])[0].get("plain_text", "Unknown")
+                access_token = props.get("텍스트", {}).get("rich_text", [{}])[0].get("plain_text", "")
+                refresh_token = props.get("텍스트 1", {}).get("rich_text", [{}])[0].get("plain_text", "")
+                
                 if access_token:
                     recipients.append({
                         "name": name,
@@ -73,7 +83,7 @@ def get_recipients():
                 
         return recipients
     except Exception as e:
-        print(f"[Notion] Fetch failed: {e}")
+        print(f"[Notion] Fetch failed: {msg := getattr(e, 'response', None) and e.response.text or str(e)}")
         return []
 
 def add_recipient(name, tokens):

@@ -194,7 +194,7 @@ class handler(BaseHTTPRequestHandler):
             const redirectUri = window.location.origin; 
             // 함장님께 정확한 주소를 한번 더 알림으로 보여드립니다.
             console.log('Using Redirect URI:', redirectUri);
-            const url = `https://kauth.kakao.com/oauth/authorize?client_id=${{clientId}}&redirect_uri=${{encodeURIComponent(redirectUri)}}&response_type=code`;
+            const url = `https://kauth.kakao.com/oauth/authorize?client_id=${{clientId}}&redirect_uri=${{encodeURIComponent(redirectUri)}}&response_type=code&scope=talk_message`;
             window.open(url, '_blank');
         }}
 
