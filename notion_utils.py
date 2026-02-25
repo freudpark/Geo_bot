@@ -24,8 +24,11 @@ def get_recipients():
     headers = get_notion_headers()
     
     if not database_id or not headers:
+        print(f"[Notion] Missing config - DB_ID: {database_id}, Headers: {'Present' if headers else 'Missing'}")
         # 폴백: 환경변수가 없으면 로컬 파일(있다면) 또는 빈 리스트 반환
         return []
+
+    print(f"[Notion] Querying database: {database_id}")
 
     url = f"https://api.notion.com/v1/databases/{database_id}/query"
     payload = {

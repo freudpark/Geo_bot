@@ -18,7 +18,11 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write("Daily alert executed successfully.".encode('utf-8'))
         except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            print(f"CRITICAL ERROR in cron handler: {error_details}")
+            
             self.send_response(500)
             self.send_header('Content-type', 'text/plain; charset=utf-8')
             self.end_headers()
-            self.wfile.write(f"Error executing daily alert: {str(e)}".encode('utf-8'))
+            self.wfile.write(f"Error executing daily alert: {str(e)}\n\n{error_details}".encode('utf-8'))

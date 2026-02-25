@@ -40,6 +40,7 @@ def get_daily_schedule(file_path):
                 col_mapping[cols[i+1]] = '작업시간 (소요시간)'
     
     df.rename(columns=col_mapping, inplace=True)
+    print(f"Debug - Columns after mapping: {df.columns.tolist()}")
 
     # 필수 컬럼 정의
     target_cols = ['상태', '일자 (시작)', '일자 (종료)', '구분', '팀구분', '작업명', '작업시간 (시작)', '작업시간 (소요시간)']
@@ -49,17 +50,28 @@ def get_daily_schedule(file_path):
             df[tc] = None
 
     # '일자 (시작)'과 '일자 (종료)' 컬럼을 datetime 객체로 변환
-    df['일자 (시작)'] = pd.to_datetime(df['일자 (시작)'], errors='coerce')
-    df['일자 (종료)'] = pd.to_datetime(df['일자 (종료)'], errors='coerce')
+    # 한국에서 흔히 사용하는 형식들 시도
+    for col in ['일자 (시작)', '일자 (종료)']:
+        df[col] = pd.to_datetime(df[col], errors='coerce')
+    
     # 종료일이 없거나 파싱 실패 시 시작일로 대체
     df['일자 (종료)'] = df['일자 (종료)'].fillna(df['일자 (시작)'])
+    print(f"Debug - Date parsing completed. Valid rows: {df['일자 (시작)'].notna().sum()}")
 
-    # 오늘 날짜 가져오기
+    # 오늘 날짜 가져오기 (UTC 기준 Vercel 환경 고려)
+    # 한국 시간(KST)으로 보정해서 필터링할 수도 있으나, 0시에 실행된다면 UTC/KST 일자가 같을 가능성이 큼
     today = datetime.now().date()
+    print(f"Debug - Today's date (UTC): {today}")
 
     # 오늘 날짜에 해당하는 일정 필터링
     # 시작일 <= 오늘 <= 종료일 인 경우를 찾습니다.
-    today_schedule = df[(df['일자 (시작)'].dt.date <= today) & (df['일자 (종료)'].dt.date >= today)]
+    try:
+        mask = (df['일자 (시작)'].dt.date <= today) & (df['일자 (종료)'].dt.date >= today)
+        today_schedule = df[mask.fillna(False)]
+        print(f"Debug - Filtered schedule count: {len(today_schedule)}")
+    except Exception as e:
+        print(f"Debug - Filtering failed: {e}")
+        today_schedule = pd.DataFrame()
 
     summary = f"### 정보자원사업단 AI 알림이\n- 제목 : {today.strftime('%Y년 %m월 %d일')} 일정 요약\n\n"
 

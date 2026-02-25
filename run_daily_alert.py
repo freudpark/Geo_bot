@@ -22,13 +22,18 @@ def run():
         f.write(response.content)
 
     # 2. 일정 요약 생성
+    print("Generating raw summary...")
     raw_summary = get_daily_schedule(csv_path)
+    print(f"Raw summary generated (length: {len(raw_summary)})")
     
     # 3. AI 고도화 요약 (Gemini 활용)
+    print("Generating AI summary...")
     from ai_agent import generate_ai_summary
     final_summary = generate_ai_summary(raw_summary)
+    print(f"AI summary generated (length: {len(final_summary)})")
 
     # 4. 카카오톡 전송
+    print("Sending to recipients...")
     from kakao_utils import send_to_all_recipients
     result = send_to_all_recipients(final_summary)
     
@@ -43,7 +48,7 @@ def run():
         except:
             pass
     
-    print(f"Finished. Result: {result}")
+    print(f"Finished. Final result: {result}")
 
 if __name__ == "__main__":
     run()
