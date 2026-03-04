@@ -6,15 +6,18 @@ def get_daily_schedule(file_path):
     # CSV 파일을 먼저 읽어서 헤더 구조를 파악합니다.
     df_raw = pd.read_csv(file_path, encoding='utf-8', header=None)
 
-    # 실제 헤더가 있는 행을 찾습니다. (예: '순번' 컬럼이 있는 행)
+    # 실제 헤더가 있는 행을 찾습니다. (예: '상태' 및 '작업명' 컬럼이 같이 있는 행)
     header_row_index = -1
     for i, row in df_raw.iterrows():
-        if '순번' in row.astype(str).values:
+        row_str = row.astype(str).tolist()
+        if '상태' in row_str and '작업명' in row_str:
             header_row_index = i
             break
 
     if header_row_index == -1:
-        raise ValueError("Could not find header row with '순번' column.")
+        # 못 찾으면 기본 2번째 줄(인덱스 2)을 헤더로 추정해봅니다.
+        header_row_index = 2
+
 
     # 실제 헤더를 사용하여 다시 CSV 파일을 읽습니다.
     df = pd.read_csv(file_path, encoding='utf-8', skiprows=header_row_index)
