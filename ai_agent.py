@@ -14,16 +14,17 @@ def generate_ai_summary(schedule_data):
     print(f"[Debug] Provider detected: {provider}")
     print(f"[Debug] API Key set: {'Yes' if api_key else 'No'}")
 
-    # AI 설정이 없으면 즉시 요약 없이 원본 반환
-    if not api_key:
-        return schedule_data + "\n\n(안내: AI 키가 설정되지 않아 기본 일정만 전송합니다.)"
-
     # D-Day 계산 (2026년 6월 12일 기준)
     from datetime import datetime
     target_date = datetime(2026, 6, 12).date()
     today = datetime.now().date()
     d_day = (target_date - today).days
     d_day_str = f"D-{d_day}" if d_day > 0 else (f"D+{abs(d_day)}" if d_day < 0 else "D-Day")
+
+    # AI 설정이 없으면 즉시 요약 없이 원본+D-Day 반환
+    if not api_key:
+        footer = f"\n\n[사업완료일까지 {d_day_str}]"
+        return schedule_data + "\n\n(안내: AI 키가 설정되지 않아 기본 일정만 전송합니다.)" + footer
 
     common_prompt = f"""
 다음 일정을 핵심만 뽑아 아주 간결한 불렛포인트로 요약해 주세요. 

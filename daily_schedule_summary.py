@@ -14,36 +14,34 @@ def get_daily_schedule(file_path):
             header_row_index = i
             break
 
-    if header_row_index == -1:
-        # 못 찾으면 기본 2번째 줄(인덱스 2)을 헤더로 추정해봅니다.
-        header_row_index = 2
-
-
-    # 실제 헤더를 사용하여 다시 CSV 파일을 읽습니다.
-    df = pd.read_csv(file_path, encoding='utf-8', skiprows=header_row_index)
-    print("Debug - Raw columns:", df.columns.tolist())
-
-    # 컬럼명 유연하게 매핑 (인덱스 및 키워드 기반)
-    cols = df.columns.tolist()
+    # 새로운 방식으로 헤더 인덱스를 1로 고정하여 읽고, (1번행이 '상태', '일자' 등이 있는 메인 헤더)
+    # 2번행에 서브헤더('시작', '종료')가 있으므로 이를 조합하거나 인덱스 기반으로 강제 매핑합니다.
+    df = pd.read_csv(file_path, encoding='utf-8', skiprows=1)
+    
+    # 컬럼 이름이 복잡하므로 위치(index)를 기반으로 고정 매핑하는 것이 가장 안전합니다.
+    # 제공된 df.iloc[1] 데이터 기반:
+    # 0: 상태, 1: 일자(시작), 2: 일자(종료), 3: 구분, 7: 팀구분, 8: 작업명, 9: 작업시간(시작), 10: 작업시간(소요시간)
+    
     col_mapping = {}
-    
-    for i, col in enumerate(cols):
-        clean_col = str(col).strip()
-        if '상태' == clean_col: col_mapping[col] = '상태'
-        elif '팀구분' in clean_col: col_mapping[col] = '팀구분'
-        elif '구분' == clean_col: col_mapping[col] = '구분'
-        elif '작업명' in clean_col: col_mapping[col] = '작업명'
-        elif '일자' in clean_col:
-            col_mapping[col] = '일자 (시작)'
-            if i + 1 < len(cols) and 'Unnamed' in str(cols[i+1]):
-                col_mapping[cols[i+1]] = '일자 (종료)'
-        elif '작업시간' in clean_col:
-            col_mapping[col] = '작업시간 (시작)'
-            if i + 1 < len(cols) and 'Unnamed' in str(cols[i+1]):
-                col_mapping[cols[i+1]] = '작업시간 (소요시간)'
-    
+    cols = df.columns.tolist()
+    if len(cols) >= 11:
+        col_mapping[cols[0]] = '상태'
+        col_mapping[cols[1]] = '일자 (시작)'
+        col_mapping[cols[2]] = '일자 (종료)'
+        col_mapping[cols[3]] = '구분'
+        col_mapping[cols[7]] = '팀구분'
+        col_mapping[cols[8]] = '작업명'
+        col_mapping[cols[9]] = '작업시간 (시작)'
+        col_mapping[cols[10]] = '작업시간 (소요시간)'
+        
     df.rename(columns=col_mapping, inplace=True)
-    print(f"Debug - Columns after mapping: {df.columns.tolist()}")
+    
+    # 데이터 행은 2번 인덱스부터 시작하므로 (원래 CSV 기준 3번째 줄부터 데이터), 
+    # skiprows=1로 읽었으니 0번 인덱스 행('시작', '종료' 등의 서브헤더)을 제거합니다.
+    if len(df) > 0:
+        df = df.drop(0).reset_index(drop=True)
+        
+    print(f"Debug - Columns after specific mapping: {df.columns.tolist()[:11]}")
 
     # 필수 컬럼 정의
     target_cols = ['상태', '일자 (시작)', '일자 (종료)', '구분', '팀구분', '작업명', '작업시간 (시작)', '작업시간 (소요시간)']
@@ -63,20 +61,22 @@ def get_daily_schedule(file_path):
 
     # 오늘 날짜 가져오기 (UTC 기준 Vercel 환경 고려)
     # 한국 시간(KST)으로 보정해서 필터링할 수도 있으나, 0시에 실행된다면 UTC/KST 일자가 같을 가능성이 큼
-    today = datetime.now().date()
-    print(f"Debug - Today's date (UTC): {today}")
+    # 비교를 위해 datetime 타입 원본을 유지하거나 pd.Timestamp 사용
+    today_ts = pd.Timestamp(datetime.now().date())
+    print(f"Debug - Today's date TS: {today_ts}")
 
     # 오늘 날짜에 해당하는 일정 필터링
     # 시작일 <= 오늘 <= 종료일 인 경우를 찾습니다.
     try:
-        mask = (df['일자 (시작)'].dt.date <= today) & (df['일자 (종료)'].dt.date >= today)
+        # 시간 부분이 들어간 경우를 대비하여 normalize() 처리
+        mask = (df['일자 (시작)'].dt.normalize() <= today_ts) & (df['일자 (종료)'].dt.normalize() >= today_ts)
         today_schedule = df[mask.fillna(False)]
         print(f"Debug - Filtered schedule count: {len(today_schedule)}")
     except Exception as e:
         print(f"Debug - Filtering failed: {e}")
         today_schedule = pd.DataFrame()
 
-    summary = f"### 정보자원사업단 AI 알림이\n- 제목 : {today.strftime('%Y년 %m월 %d일')} 일정 요약\n\n"
+    summary = f"### 정보자원사업단 AI 알림이\n- 제목 : {datetime.now().strftime('%Y년 %m월 %d일')} 일정 요약\n\n"
 
     if not today_schedule.empty:
         summary += "### 오늘의 주요 일정 및 작업 계획\n\n"

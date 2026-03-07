@@ -35,7 +35,7 @@ def get_recipients():
         "filter": {
             "property": "상태",
             "status": {
-                "equals": "완료"
+                "does_not_equal": "시작전"
             }
         }
     }
@@ -65,8 +65,8 @@ def get_recipients():
                 elif status_type == "select":
                     status_value = status_prop.get("select", {}).get("name", "")
                 
-                # '완료' 상태가 아니면 건너뜀 (수동 필터링 시)
-                if status_value != "완료":
+                # '시작전' 상태면 건너뜀 (수동 필터링 시)
+                if status_value == "시작전":
                     continue
 
                 name = props.get("이름", {}).get("title", [{}])[0].get("plain_text", "Unknown")
