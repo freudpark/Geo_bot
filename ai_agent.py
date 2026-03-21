@@ -24,7 +24,7 @@ def generate_ai_summary(schedule_data):
     # AI 설정이 없으면 즉시 요약 없이 원본+D-Day 반환
     if not api_key:
         footer = f"\n\n[사업완료일까지 {d_day_str}]"
-        return schedule_data + "\n\n(안내: AI 키가 설정되지 않아 기본 일정만 전송합니다.)" + footer
+        return schedule_data + footer
 
     common_prompt = f"""
 다음 일정을 핵심만 뽑아 아주 간결한 불렛포인트로 요약해 주세요. 
@@ -80,7 +80,7 @@ def generate_ai_summary(schedule_data):
 
     # 최종 폴백: 에러 코드 대신 사용자 친화적인 안내 문구 반환
     footer = f"\n\n[사업완료일까지 {d_day_str}]"
-    return schedule_data + "\n\n💡 (안내: AI 요약 중 서버 혼잡으로 기본 정보를 전송합니다.)" + footer
+    return schedule_data + footer
 
 if __name__ == "__main__":
     test_data = "## 정보자원 AI 알림이 - 2026년 02월 23일\n- [작업] 서버 점검 (상태: 진행중, 팀: 인프라팀)\n- [일정] 주간 회의 (상태: 예정, 팀: 기획팀)"
