@@ -32,11 +32,20 @@ def run():
     final_summary = generate_ai_summary(raw_summary)
     print(f"AI summary generated (length: {len(final_summary)})")
 
-    # 4. 카카오톡 전송
-    print("Sending to recipients...")
+    # 4. 카카오톡 전송 (기존 유지)
+    print("Sending to Kakao recipients...")
     from kakao_utils import send_to_all_recipients
-    result = send_to_all_recipients(final_summary)
+    kakao_result = send_to_all_recipients(final_summary)
     
+    # 5. 텔레그램 전송 (신규 추가)
+    print("Sending to Telegram group...")
+    try:
+        from telegram_utils import send_telegram_message
+        tg_result = send_telegram_message(final_summary)
+        print(f"[Telegram] Result: {'Success' if tg_result else 'Failed'}")
+    except Exception as e:
+        print(f"[Telegram] Error during send: {e}")
+
     # 서버리스 환경에서는 일반 파일 쓰기가 제한될 수 있으므로 분기 처리
     if not is_vercel:
         base_path = os.path.dirname(os.path.abspath(__file__))
@@ -44,11 +53,11 @@ def run():
         try:
             with open(log_path, 'a', encoding='utf-8') as f:
                 from datetime import datetime
-                f.write(f"{datetime.now()}: Execution result - {result}\n")
+                f.write(f"{datetime.now()}: Execution result - {kakao_result}\n")
         except:
             pass
     
-    print(f"Finished. Final result: {result}")
+    print(f"Finished. Final result: {kakao_result}")
 
 if __name__ == "__main__":
     run()
