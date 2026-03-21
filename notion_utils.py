@@ -35,7 +35,7 @@ def get_recipients():
         "filter": {
             "property": "상태",
             "status": {
-                "does_not_equal": "시작전"
+                "equals": "완료"
             }
         }
     }
@@ -45,9 +45,9 @@ def get_recipients():
         response.raise_for_status()
         results = response.json().get("results", [])
         
-        # 만약 필터링된 결과가 없으면 전체 데이터를 가져와서 수동 필터링 시도 (Notion 필터 속성 불일치 대비)
+        # 만약 필터링된 결과가 없으면 전체 데이터를 가져와서 수동 필터링 시도
         if not results:
-            print("[Notion] No results with group filter. Trying secondary fetch without filter.")
+            print("[Notion] No initial results. Trying secondary fetch without filter.")
             res_all = requests.post(url, headers=headers, json={})
             if res_all.status_code == 200:
                 results = res_all.json().get("results", [])
@@ -86,7 +86,8 @@ def get_recipients():
                 
         return recipients
     except Exception as e:
-        print(f"[Notion] Fetch failed: {msg := getattr(e, 'response', None) and e.response.text or str(e)}")
+        error_msg = getattr(e, 'response', None) and e.response.text or str(e)
+        print(f"[Notion] Fetch failed: {error_msg}")
         return []
 
 def add_recipient(name, tokens):
