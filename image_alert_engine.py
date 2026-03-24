@@ -65,7 +65,7 @@ class ImageAlertEngine:
         <body>
             <div class="glass-card">
                 <div class="mb-1.5 border-b border-white/10 pb-1 flex justify-between items-baseline">
-                    <div class="text-[#f8fafc] text-[16px] font-black tracking-tighter opacity-90">정보자원 AI 일일 알리미</div>
+                    <div class="text-[#fbbf24] text-[16px] font-black tracking-tighter opacity-100">정보자원 AI 일일 알리미</div>
                     <div class="text-[#38bdf8] text-[9px] font-bold tracking-widest opacity-80">{date_str}</div>
                 </div>
                 

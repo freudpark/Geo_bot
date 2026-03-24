@@ -3,8 +3,8 @@ import json
 import os
 import requests
 import sys
-import subprocess
 from datetime import datetime
+import re
 
 # 프로젝트 루트 임포트 경로 추가
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -30,33 +30,29 @@ class handler(BaseHTTPRequestHandler):
 
         # 2. 명령어 처리
         if text and text.startswith("/"):
+            # [추가] 날짜 검색 패턴 매칭 (예: 3월 11일 일정을 보여줘)
+            date_match = re.search(r'(\d+)월\s*(\d+)일', text)
+            
             if text.startswith("/수정"):
-                # 함장님의 코드 수정 명령 처리
-                request_text = text.replace("/수정", "").strip()
-                if not request_text:
-                    self.send_telegram_msg(token, chat_id, "⚠️ 수정 내용을 입력해 주세요. 예: /수정 폰트 크기를 14px로 변경")
+                # 수정 명령 내부에 날짜 검색이 포함된 경우
+                if date_match:
+                    month, day = date_match.groups()
+                    target_date = f"2026-{month.zfill(2)}-{day.zfill(2)}"
+                    self.send_telegram_msg(token, chat_id, f"🔍 함장님, {month}월 {day}일({target_date})의 과거 기동 기록을 조회합니다...")
+                    self.handle_date_search(token, chat_id, target_date)
                 else:
-                    self.send_telegram_msg(token, chat_id, f"🛠️ 함장님, '{request_text}' 명령을 분석하여 코드를 수정하고 배포를 시도합니다. (약 1분 소요)")
-                    # 비동기적으로 처리하거나 혹은 여기서 처리 (Vercel 타임아웃 주의)
-                    self.handle_code_edit(token, chat_id, request_text)
-
-            elif text == "/원복":
-                # 최후의 수단: 롤백 명령
-                self.send_telegram_msg(token, chat_id, "🏮 함장님, 마지막 성공 버전으로 시스템을 원복(Rollback)합니다.")
-                self.handle_rollback(token, chat_id)
+                    request_text = text.replace("/수정", "").strip()
+                    self.send_telegram_msg(token, chat_id, f"🛠️ '{request_text}' 명령을 안티그래비티 기지에 전달했습니다. (AI 분석 중)")
 
             elif text == "/보고":
-                self.send_telegram_msg(token, chat_id, "🚀 함장님, 리포트를 생성 중입니다. (이미지 생성 시도 중...)")
-                try:
-                    from run_daily_alert import run_with_result
-                    success, final_summary, image_path = run_with_result()
-                    if success and image_path:
-                        from telegram_photo_utils import send_telegram_photo
-                        send_telegram_photo(image_path, caption="💎 [PyhgoShift] 최신 지휘 보고서")
-                    else:
-                        self.send_telegram_msg(token, chat_id, f"⚠️ 이미지 생성 실패. 텍스트 보고:\n\n{final_summary}")
-                except Exception as e:
-                    self.send_telegram_msg(token, chat_id, f"❌ 장애 발생: {str(e)}")
+                self.send_telegram_msg(token, chat_id, "🚀 함장님, 오늘의 리포트 생성을 시도합니다...")
+                from run_daily_alert import run_with_result
+                success, summary, img = run_with_result()
+                if success and img:
+                    from telegram_photo_utils import send_telegram_photo
+                    send_telegram_photo(img, caption="💎 오늘의 지휘 카드")
+                else:
+                    self.send_telegram_msg(token, chat_id, f"⚠️ 이미지 생성 불가. 텍스트 보고:\n\n{summary}")
             
             else:
                 response_text = self.process_command(text, chat_id)
@@ -66,25 +62,30 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b"OK")
 
-    def handle_code_edit(self, token, chat_id, request_text):
-        """AI를 통한 코드 수정 및 자동 배포 로직 (Conceptual)"""
-        # 이 부분은 실제로는 AI 에이전트 환경(안티그래비티 등)에서 코드로 구현되어야 함
-        # Vercel 환경에서는 Git 명령이 불가능하므로, 실제 수정은 안티그래비티(나)가 함장님 명령을 받아서 수행함.
-        # 여기서는 함장님께 "접수 완료" 알림을 주는 역할을 함.
-        self.send_telegram_msg(token, chat_id, "🤖 [AI 에이전트] 함장님의 수정 명령이 안티그래비티 기지에 전달되었습니다. 제가 직접 코드를 수정하고 배포하겠습니다.")
-
-    def handle_rollback(self, token, chat_id):
-        """Git Revert 혹은 Vercel Rollback 트리거 (Conceptual)"""
-        # 함장님, 원복은 안티그래비티 대화창에서 제가 직접 'git revert'를 실행하여 처리해 드릴 것입니다.
-        self.send_telegram_msg(token, chat_id, "🏮 [AI 에이전트] 이전 커밋으로 원복 절차를 밟습니다. 잠시만 기다려 주십시오.")
+    def handle_date_search(self, token, chat_id, date_str):
+        """특정 날짜의 일정을 검색하여 텍스트로 즉각 보고합니다."""
+        try:
+            # 외부 검색 엔진(search_date.py)의 로직을 활용
+            csv_url = 'https://docs.google.com/spreadsheets/d/1hS38RfKBaq13MOWutb4CteswgIIc5Weos0Np-4faRGk/export?format=csv&gid=0'
+            res = requests.get(csv_url)
+            tmp_path = '/tmp/search_task.csv' if os.getenv('VERCEL') == '1' else 'search_task.csv'
+            with open(tmp_path, 'wb') as f: f.write(res.content)
+            
+            # 검색 및 요약 생성 (기존 search_date.py 로직 내재화 혹은 임포트)
+            from search_date import get_schedule_by_date
+            text_report = get_schedule_by_date(tmp_path, date_str)
+            
+            self.send_telegram_msg(token, chat_id, f"📜 함장님, {date_str}의 기록 복원 완료:\n\n{text_report}")
+        except Exception as e:
+            self.send_telegram_msg(token, chat_id, f"❌ 날짜 검색 중 통신 장애: {str(e)}")
 
     def process_command(self, text, chat_id):
         cmd = text.split()[0]
         if cmd == "/상태":
-            return f"💎 [PyhgoShift] 함대 상태 보고\n서버 시각: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n엔진 상황: 정상 기동 중"
+            return f"💎 [PyhgoShift] 함대 기동 상태: 정상\nD-Day 전선 이상 없음."
         elif cmd == "/도움말":
-            return "🛡️ 함대 원격 지휘소\n/보고 - 리포트 즉시 발송\n/상태 - 시스템 상태 확인\n/수정 [내용] - AI 코드 수정 및 배포\n/원복 - 마지막 성공 버전으로 롤백"
-        return f"⚠️ '{cmd}'는 인가되지 않은 명령입니다. /도움말을 참고하십시오."
+            return "🛡️ 지휘 가이드\n/보고 - 오늘 일정 (카드+텍스트)\n/수정 [MM월 DD일 일정] - 과거 기록 조회\n/수정 [내용] - AI 코드 수정"
+        return f"⚠️ 미인가 명령: {cmd}"
 
     def send_telegram_msg(self, token, chat_id, text):
         url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -92,6 +93,5 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.send_response(200)
-        self.send_header('Content-type', 'text/plain; charset=utf-8')
         self.end_headers()
-        self.wfile.write("Telegram Webhook Handler is Active with Code-Edit Support.".encode('utf-8'))
+        self.wfile.write("Telegram Webhook Handler with Date Search Active.".encode('utf-8'))
