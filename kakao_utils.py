@@ -63,19 +63,32 @@ def load_tokens():
     with open(token_path, "r") as fp:
         return json.load(fp)
 
-def send_message(access_token, text):
+def send_image_message(access_token, image_url, text):
+    """이미지 피드 템플릿을 사용하여 카카오톡 메시지를 전송합니다."""
     url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
     headers = {
         "Authorization": "Bearer " + access_token
     }
     template = {
-        "object_type": "text",
-        "text": text,
-        "link": {
-            "web_url": "https://localhost",
-            "mobile_web_url": "https://localhost"
+        "object_type": "feed",
+        "content": {
+            "title": "정보자원 Daily 알림",
+            "description": text[:20] + "...", # 요약 텍스트 일부
+            "image_url": image_url,
+            "link": {
+                "web_url": "https://localhost",
+                "mobile_web_url": "https://localhost"
+            }
         },
-        "button_title": "일정 확인"
+        "buttons": [
+            {
+                "title": "상세 내용 확인",
+                "link": {
+                    "web_url": "https://localhost",
+                    "mobile_web_url": "https://localhost"
+                }
+            }
+        ]
     }
     data = {
         "template_object": json.dumps(template)
@@ -83,7 +96,7 @@ def send_message(access_token, text):
     response = requests.post(url, headers=headers, data=data)
     return response.json()
 
-def send_to_all_recipients(text):
+def send_to_all_recipients(text, image_url=None):
     from notion_utils import get_recipients
     recipients = get_recipients()
     
@@ -92,7 +105,11 @@ def send_to_all_recipients(text):
         print("[Kakao] No Notion recipients. Falling back to single token.")
         try:
             tokens = load_tokens()
-            return [send_message(tokens["access_token"], text)]
+            if image_url:
+                return [send_image_message(tokens["access_token"], image_url, text)]
+            else:
+                # 이미지 없으면 기존 텍스트 전송 (fallback)
+                return [{"error": "No image URL provided for image message"}]
         except:
             return [{"error": "No recipients found"}]
 
@@ -101,7 +118,10 @@ def send_to_all_recipients(text):
     
     for r in recipients:
         print(f"[Kakao] Sending to {r['name']}...")
-        res = send_message(r['access_token'], text)
+        if image_url:
+            res = send_image_message(r['access_token'], image_url, text)
+        else:
+            res = {"error": "No image URL available"}
         
         # 토큰 만료 에러 (-401) 발생 시 리프레시 시도
         if isinstance(res, dict) and res.get("code") == -401 and r.get("refresh_token") and client_id:
@@ -114,7 +134,8 @@ def send_to_all_recipients(text):
                 
                 # 새 토큰으로 재전송
                 print(f"[Kakao] Retrying send for {r['name']} with new token.")
-                res = send_message(new_tokens["access_token"], text)
+                if image_url:
+                    res = send_image_message(new_tokens["access_token"], image_url, text)
         
         results.append({"name": r['name'], "result": res})
         

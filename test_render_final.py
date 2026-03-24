@@ -1,0 +1,124 @@
+
+import sys
+import os
+
+# --- 베젤 축소, 한글화, 초정밀 사이즈 조정이 적용된 최종 템플릿 ---
+html_content = f"""
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
+        body {{ 
+            font-family: 'Pretendard', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #0f172a; /* 배경 무늬 없는 깔끔한 다크 딥 블루 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 650px; /* 전체 캔버스 축소 (베젤 최소화) */
+            height: 650px;
+        }}
+        .glass-card {{
+            width: 600px; /* 카드 크기 유지 */
+            height: 600px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(40px);
+            border-radius: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }}
+        /* 상단 테두리 글로우 */
+        .glass-card::after {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #38bdf8, transparent);
+        }}
+        .icon-box {{
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 14px;
+            font-size: 16px;
+        }}
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <!-- Title & Date (한글화) -->
+        <div class="text-center mb-10">
+            <h1 class="text-[#f8fafc] text-4xl font-black mb-3 tracking-tight">정보자원 Daily 알림</h1>
+            <p class="text-[#38bdf8] text-2xl font-bold tracking-[0.2em]">2026-03-23</p>
+        </div>
+
+        <!-- Content (한글화 및 가독성 업) -->
+        <div class="flex-1 space-y-8 px-2">
+            <div class="flex items-center text-[26px] font-bold text-[#f8fafc]">
+                <div class="icon-box bg-emerald-500/20 text-emerald-400">✓</div>
+                <span>완료된 작업: <span class="text-emerald-400">12 (80%)</span></span>
+            </div>
+            <div class="flex items-center text-[26px] font-bold text-[#f8fafc]">
+                <div class="icon-box bg-amber-500/20 text-amber-400">🕒</div>
+                <span>진행중 작업: <span class="text-amber-400">4 (검토 대기)</span></span>
+            </div>
+            <div class="flex items-center text-[26px] font-bold text-[#f8fafc]">
+                <div class="icon-box bg-slate-500/20 text-slate-400">●</div>
+                <span>중요한 일정: <span class="text-slate-200">2 (미배정)</span></span>
+            </div>
+            <div class="flex items-center text-[26px] font-bold text-[#f8fafc]">
+                <div class="icon-box bg-rose-500/20 text-rose-400">⚠️</div>
+                <span>지연된 항목: <span class="text-rose-400">0 (지연 없음)</span></span>
+            </div>
+        </div>
+
+        <!-- Footer (한글화) -->
+        <div class="mt-6 py-6 border-t border-white/10 text-center">
+            <p class="text-[32px] font-black text-[#f8fafc] opacity-90 tracking-tight">
+                사업 완료일까지 <span class="text-[#f43f5e] ml-2">D-81</span>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+# HTML을 임시 파일요 저장
+with open('final_ko_glass.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+# Node.js 렌더링 스크립트 (사이즈 최적화 렌더링)
+node_script = """
+const nodeHtmlToImage = require('node-html-to-image')
+const fs = require('fs')
+
+const html = fs.readFileSync('final_ko_glass.html', 'utf8')
+
+nodeHtmlToImage({
+  output: './final_ko_glass_card.png',
+  html: html,
+  puppeteerArgs: {
+    args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+  }
+}).then(() => console.log('Final KO Glass Card created!'))
+"""
+
+with open('render_final.js', 'w', encoding='utf-8') as f:
+    f.write(node_script)
+
+print("Starting Final KO Glass Card Engine...")
+os.system("node render_final.js")

@@ -1,0 +1,79 @@
+
+import sys
+import os
+
+# --- HTML 템플릿 정의 ---
+html_content = f"""
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&display=swap');
+        body {{ font-family: 'Pretendard', sans-serif; }}
+        .glass {{
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }}
+    </style>
+</head>
+<body class="bg-[#0f172a] flex items-center justify-center min-h-screen">
+    <div class="glass w-[800px] h-[500px] rounded-[32px] p-10 relative flex flex-col shadow-2xl overflow-hidden">
+        <!-- Logo -->
+        <div class="absolute top-8 left-10 text-[#38bdf8] font-black text-xl tracking-tighter">PyhgoShift</div>
+        
+        <!-- Header -->
+        <div class="text-center mt-4 mb-8">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-[#38bdf8] to-[#818cf8] bg-clip-text text-transparent">
+                정보자원 Daily 알림
+            </h1>
+            <p class="text-[#94a3b8] mt-2 text-lg">2026년 03월 23일</p>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 text-[#f8fafc] text-xl leading-relaxed space-y-4 overflow-hidden pr-4">
+            <p class="text-center text-[#94a3b8] italic">"오늘 예정된 주요 일정 및 작업은 없습니다."</p>
+            <div class="h-[2px] bg-white/10 w-24 mx-auto"></div>
+            <ul class="space-y-3 opacity-80">
+                <li class="flex items-start"><span class="text-[#38bdf8] mr-3">●</span> [인프라] 서버 보안 패치 (상태: 대기)</li>
+                <li class="flex items-start"><span class="text-[#38bdf8] mr-3">●</span> [네트워크] 방화벽 정책 검토 (상태: 진행중)</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 pt-6 border-t border-white/10 flex justify-between items-center text-[#64748b]">
+            <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span class="text-sm uppercase tracking-widest font-bold">System Online</span>
+            </div>
+            <div class="text-2xl font-black text-[#f43f5e] tracking-tight">D-81</div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+# HTML을 임시 파일로 저장
+with open('temp.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+# Node.js 스크립트로 렌더링 (간단하게 제작)
+node_script = """
+const nodeHtmlToImage = require('node-html-to-image')
+const fs = require('fs')
+
+const html = fs.readFileSync('temp.html', 'utf8')
+
+nodeHtmlToImage({
+  output: './alert_card_sample.png',
+  html: html
+}).then(() => console.log('The image was created successfully!'))
+"""
+
+with open('render.js', 'w', encoding='utf-8') as f:
+    f.write(node_script)
+
+print("Starting Node.js rendering engine...")
+os.system("node render.js")

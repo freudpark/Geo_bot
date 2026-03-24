@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 
-def generate_ai_summary(schedule_data):
+def generate_ai_summary(schedule_data, d_day_str):
     """
     다양한 AI 프로바이더를 지원하며, 서버 오류 시 깔끔하게 기본 내용을 반환하는 튼튼한 요약 함수입니다.
     """
@@ -13,13 +13,6 @@ def generate_ai_summary(schedule_data):
     # 디버깅용 로그 (Vercel 로그에서 확인 가능)
     print(f"[Debug] Provider detected: {provider}")
     print(f"[Debug] API Key set: {'Yes' if api_key else 'No'}")
-
-    # D-Day 계산 (2026년 6월 12일 기준)
-    from datetime import datetime
-    target_date = datetime(2026, 6, 12).date()
-    today = datetime.now().date()
-    d_day = (target_date - today).days
-    d_day_str = f"D-{d_day}" if d_day > 0 else (f"D+{abs(d_day)}" if d_day < 0 else "D-Day")
 
     # AI 설정이 없으면 즉시 요약 없이 원본+D-Day 반환
     if not api_key:

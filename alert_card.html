@@ -1,0 +1,38 @@
+
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+            <meta charset="UTF-8">
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@700;900&display=swap');
+                body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; width: 320px; height: 205px; }
+                .glass-card { width: 290px; height: 185px; background: linear-gradient(135deg, rgba(30, 41, 59, 1.0), rgba(15, 23, 42, 1.0)); border-radius: 20px; border: 1.2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 40px 80px rgba(0, 0, 0, 0.95); padding: 15px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+                .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px; background: linear-gradient(90deg, transparent, #38bdf8, transparent); }
+            </style>
+        </head>
+        <body>
+            <div class="glass-card">
+                <div class="mb-1.5 border-b border-white/10 pb-1 flex justify-between items-baseline">
+                    <div class="text-[#f8fafc] text-[16px] font-black tracking-tighter opacity-90">정보자원 AI 일일 알리미</div>
+                    <div class="text-[#38bdf8] text-[9px] font-bold tracking-widest opacity-80">2026-03-24</div>
+                </div>
+                
+                <div class="flex-1 overflow-visible">
+                <div class="flex items-start text-[12px] font-bold text-[#f8fafc] mb-1 leading-tight border-l-2 border-[#38bdf8]/50 pl-2.5">
+                    <div class="flex-1 whitespace-normal break-words">[일정] 제로트러스트 컨설팅 수준진단 추진단 인터뷰(김철완 주무관 등) (상태: 확정, 팀: 전체)</div>
+                </div>
+                
+                <div class="flex items-start text-[12px] font-bold text-[#f8fafc] mb-1 leading-tight border-l-2 border-[#38bdf8]/50 pl-2.5">
+                    <div class="flex-1 whitespace-normal break-words">시작: 16:00, 소요시간: 2</div>
+                </div>
+                </div>
+                
+                <div class="pt-0.5 border-t border-white/5 flex flex-col items-center justify-center opacity-80">
+                    <p class="text-[9px] font-bold text-[#64748b] leading-none mb-0.5">사업 완료일까지</p>
+                    <p class="text-[15px] font-black text-[#f43f5e] tracking-tight leading-none italic">D-79</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        

@@ -1,0 +1,35 @@
+
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700;900&display=swap');
+            body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; width: 650px; height: 650px; }
+            .glass-card { width: 600px; height: 600px; background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(40px); border-radius: 60px; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5); padding: 50px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+            .glass-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #38bdf8, transparent); }
+        </style>
+    </head>
+    <body>
+        <div class="glass-card">
+            <div class="text-center mb-10">
+                <h1 class="text-[#f8fafc] text-4xl font-black mb-3 tracking-tight">정보자원 Daily 알림</h1>
+                <p class="text-[#38bdf8] text-2xl font-bold tracking-[0.2em]">2026-03-23</p>
+            </div>
+            
+        <div class="flex-1 space-y-8 px-4 flex flex-col justify-center">
+            <p class="text-[#94a3b8] text-3xl text-center italic leading-relaxed">
+                "오늘 예정된 주요 일정 및<br>작업 계획은 없습니다."
+            </p>
+        </div>
+        
+            <div class="mt-6 py-8 border-t border-white/10 text-center">
+                <p class="text-[34px] font-black text-[#f8fafc] opacity-95 tracking-tight">
+                    사업 완료일까지 <span class="text-[#f43f5e] ml-2">D-81</span>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    

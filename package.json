@@ -1,0 +1,11 @@
+{
+  "name": "pyhgoshift-alert-engine",
+  "version": "1.0.0",
+  "dependencies": {
+    "node-html-to-image": "^5.0.0",
+    "puppeteer": "^23.2.2"
+  },
+  "scripts": {
+    "postinstall": "node node_modules/puppeteer/install.mjs"
+  }
+}

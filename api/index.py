@@ -125,7 +125,10 @@ class handler(BaseHTTPRequestHandler):
                         <script>document.getElementById('hintUrl').innerText = window.location.origin;</script>
                     </p>
                     <div class="space-y-2">
-                        <input type="text" id="regCode" placeholder="인증 완료 후 나타나는 code 입력" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <div class="flex items-center justify-between px-1">
+                            <span class="text-[10px] text-amber-500 font-bold">⚠️ 주소창의 code= 뒷부분 전체를 복사하세요</span>
+                        </div>
+                        <input type="text" id="regCode" placeholder="예: code=ABC1234... (주소창 확인)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                         <button type="button" id="regBtn" onclick="registerRecipient()" class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-xl font-bold text-sm transition-all border border-slate-600">
                             2. 수신자 등록 완료
                         </button>
