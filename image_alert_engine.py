@@ -123,6 +123,11 @@ class ImageAlertEngine:
         headers = { "Authorization": f"Bearer {access_token}" }
         try:
             with open(image_path, 'rb') as f:
-                res = requests.post(url, headers=headers, files={ "file": f })
-            return res.json().get('infos', {}).get('original', {}).get('url') if res.status_code == 200 else None
+                res = requests.post(url, headers=headers, files={ "image": f })
+            
+            if res.status_code == 200:
+                return res.json().get('infos', {}).get('original', {}).get('url')
+            else:
+                print(f"[Kakao Image] Upload failed: {res.text}")
+                return None
         except: return None
